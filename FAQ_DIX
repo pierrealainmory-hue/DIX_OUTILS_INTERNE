@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Complète et Onboarding - DIX SCOP CAE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500&family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Georgia', serif; 
+            background-color: #f9fafb; 
+            color: #1f2937; 
+            line-height: 1.7;
+        }
+        h1, h2, h3, .font-title { 
+            font-family: 'Oswald', sans-serif; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em;
+        }
+        .bg-dix-dark { background-color: #405F59; }
+        .text-dix-dark { color: #405F59; }
+        .bg-dix-light { background-color: #549e39; }
+        .text-dix-light { color: #549e39; }
+        .border-dix { border-color: #405F59; }
+        
+        .faq-section {
+            margin-bottom: 2rem;
+        }
+        .faq-section-title {
+            background-color: #405F59;
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+        .faq-container {
+            background: white;
+            border-radius: 0 0 0.75rem 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            overflow: hidden;
+        }
+        
+        /* Accordion Style */
+        .faq-item {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            transition: background 0.2s;
+            cursor: pointer;
+            font-weight: bold;
+            color: #405F59;
+            font-size: 1.05rem;
+        }
+        .faq-question:hover {
+            background: #f9fafb;
+        }
+        .faq-question svg {
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+        .faq-item.active .faq-question svg {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #ffffff;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 2000px; /* Grande valeur pour accommoder le texte long */
+            transition: max-height 0.5s ease-in;
+        }
+        .answer-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background-color: #f0fdf4;
+            border: 1px solid #dcfce7;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-style: italic;
+            color: #166534;
+            margin: 1rem 0;
+        }
+
+        #search-input:focus {
+            ring: 2px;
+            ring-color: #549e39;
+            border-color: #549e39;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header avec Logo -->
+    <header class="bg-dix-dark text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center">
+                <img src="logo.png" alt="DIX Logo" class="h-10 md:h-12 mr-4 object-contain" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline-block';">
+                <span id="fallback-logo" class="hidden mr-4 text-xl font-title border-2 border-dix-light text-dix-light p-1 rounded tracking-tighter">DIX</span>
+                <h1 class="text-lg md:text-xl tracking-widest font-medium">
+                    <span class="text-dix-light">DIX SCOP CAE</span> | FAQ Onboarding
+                </h1>
+            </div>
+            
+            <!-- Barre de Recherche -->
+            <div class="relative w-full md:w-64">
+                <input type="text" id="search-input" placeholder="Rechercher une info..." 
+                    class="w-full pl-10 pr-4 py-2 rounded-full border-none text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-dix-light">
+                <div class="absolute left-3 top-2.5 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+
+        <!-- PARTIE 1 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title">PARTIE 1 : DÉCOUVRIR LE MODÈLE (ESS, SCOP & CAE)</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Qu’est‑ce qu’une SCOP‑CAE et le lien avec l'ESS ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            DIX est une <strong>Société Coopérative de Production (SCOP)</strong> organisée en <strong>Coopérative d'Activité et d'Emploi (CAE)</strong>. 
+                            De par son statut de coopérative, DIX appartient <em>de facto</em> à l'<strong>Économie Sociale et Solidaire (ESS)</strong> : son but premier n'est pas l'enrichissement de quelques actionnaires, mais le maintien de l'emploi, la juste rémunération du travail et le développement du territoire, avec une lucrativité strictement encadrée.<br><br>
+                            En CAE, des <strong>Entrepreneur·euse·s Salarié·e·s Associé·e·s (ESA)</strong> exercent leur activité au sein d’une même personne morale, avec des services mutualisés (gestion, compta, juridique) et un parcours d’adhésion au sociétariat.<br><br>
+                            <strong>Règle d’or :</strong> Les associé·e·s employé·e·s (salarié·e·s/ESA) détiennent toujours ≥ 51 % du capital et ≥ 65 % des droits de vote en permanence.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Les ESA sont-ils « indépendants » ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>Juridiquement et socialement : Non.</strong> Un·e ESA est un·e salarié·e de la coopérative (contrat de travail CDI). Il/Elle n’est pas travailleur·euse indépendant·e ou micro-entrepreneur·euse.</li>
+                                <li><strong>Opérationnellement : Oui.</strong> L’ESA développe son activité en totale autonomie, choisit ses clients et fixe ses prix. Cependant : Les devis et factures sont émis au nom de la coopérative (SIREN/TVA de la SCOP) et la responsabilité civile pro (RC Pro) est portée par la coopérative.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">En quoi consiste l'accompagnement au sein de DIX ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            L'accompagnement repose sur trois piliers horizontaux :
+                            <ol class="list-decimal pl-5 mt-2 space-y-2">
+                                <li><strong>Le soutien administratif (Le Back-Office) :</strong> La coopérative prend en charge la facturation, les déclarations URSSAF/TVA, la comptabilité et l'édition des fiches de paie.</li>
+                                <li><strong>Le suivi entrepreneurial "par les pairs" :</strong> L'accompagnement est croisé entre les ESA en fonction des expertises (stratégie, relecture d'appels d'offres, etc.).</li>
+                                <li><strong>La dynamique collective :</strong> Des ateliers internes, du partage de bonnes pratiques et des opportunités de co-traitance.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">À quoi sert mon compte d'activité individualisé ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Bien que nous partagions le même SIRET et le même compte bancaire légal, votre argent n'est pas mélangé. Vous disposez d'un "compte d'activité" (un tableau de bord de comptabilité analytique) qui retrace vos factures encaissées (au crédit), et vos achats, la contribution, vos salaires et charges sociales (au débit).<br><br>
+                            C'est sur la base de ce solde que vous décidez, en toute autonomie, de votre niveau de rémunération.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 2 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title">PARTIE 2 : L'ARGENT ET LA PROTECTION SOCIALE</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Fixe et variable : comment ça marche ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Votre rémunération dépend exclusivement de l'argent disponible sur votre compte d'activité.
+                            <ul class="list-disc pl-5 mt-2 space-y-2">
+                                <li><strong>Le Fixe (Le "Lissage") :</strong> Vous convenez d'un salaire mensuel de base régulier. Cela sécurise vos revenus et vos fiches de paie (utile pour un prêt ou un logement), même si vos encaissements sont irréguliers.</li>
+                                <li><strong>Le Variable (La "Prime") :</strong> Si votre compte déborde de trésorerie en fin d'année, vous pouvez vous verser le surplus sous forme de prime variable (soumise à cotisations) ou la placer.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Qu'est-ce qui est taxé et soumis à cotisations ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            <strong>Absolument tout ce qui est versé en salaire ou en prime.</strong> La mécanique "en cascade" :
+                            <ol class="list-decimal pl-5 mt-2 space-y-1">
+                                <li>Le <strong>"Super-Brut"</strong> : L'enveloppe disponible sur votre compte.</li>
+                                <li>Les <strong>cotisations patronales</strong> (15 % à 43 % selon le salaire).</li>
+                                <li>Le <strong>Salaire Brut</strong> (base de calcul du chômage).</li>
+                                <li>Les <strong>cotisations salariales</strong> (~ 22 %).</li>
+                                <li>Le <strong>Salaire Net</strong> (avant impôt sur le revenu).</li>
+                            </ol>
+                            <p class="highlight-box">👉 En moyenne, pour vous verser 1 000 € net, il faut consommer environ 2 000 € sur votre compte d'activité.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Quels sont mes droits (Chômage, Retraite, Mutuelle) ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            En tant que salarié·e, vous bénéficiez du régime général :
+                            <ul class="list-disc pl-5 mt-2 space-y-2">
+                                <li><strong>Chômage :</strong> Vous cotisez à l'assurance chômage. En cas de rupture, vous touchez vos allocations (ARE).</li>
+                                <li><strong>Retraite :</strong> Vous validez vos trimestres de base et cumulez des points Agirc-Arrco (Cadre).</li>
+                                <li><strong>Mutuelle :</strong> DIX propose une mutuelle d'entreprise financée à 50 % par votre compte d'activité.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 3 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title">PARTIE 3 : LE QUOTIDIEN OPÉRATIONNEL</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Quelle adresse indiquer sur mes documents ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>Documents légaux :</strong> L'adresse du siège social de DIX (Chartronges) est obligatoire pour la facturation et les contrats.</li>
+                                <li><strong>Supports commerciaux :</strong> Vous pouvez communiquer sur votre adresse locale, bureau ou espace de coworking pour valoriser votre ancrage territorial.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Comment accéder aux marchés publics locaux ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Si une collectivité exige un SIRET local, la Présidence de DIX peut ouvrir un <strong>établissement secondaire</strong> à votre adresse régionale via l'INPI (coût ~50-70 €). L'INSEE vous attribuera un SIRET localisé tout en gardant la gestion centralisée chez DIX.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Un·e ESA peut-il/elle embaucher ou collaborer ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>Embaucher :</strong> DIX signe le contrat de travail. L'ESA gère le management opérationnel et le coût est prélevé sur son compte d'activité.</li>
+                                <li><strong>Co-traitance interne :</strong> Vous pouvez travailler à plusieurs sur un marché. La recette est ventilée analytiquement sur vos comptes respectifs selon une clé de répartition convenue.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 4 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title">PARTIE 4 : LA GOUVERNANCE ET LE SOCIÉTARIAT</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Comment devient-on associé·e ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            La loi impose aux salarié·e·s de devenir sociétaires dans un délai de 3 ans maximum. Le parcours : <strong>CAPE ➔ CESA ➔ Candidature à l'AG ➔ Agrément ➔ Achat de parts sociales (1€/part)</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Comment fonctionnent les votes et collèges ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Règle : <strong>1 personne = 1 voix</strong>.
+                            Votes pondérés par collèges pour protéger les salariés :
+                            <ul class="list-disc pl-5 mt-2">
+                                <li><strong>Collège A (Salariés/ESA) :</strong> 65 % des droits de vote.</li>
+                                <li><strong>Collège B (Partenaires/Collectivités) :</strong> 35 % des droits de vote.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Un client (ex: Mairie) peut-il être associé ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Oui, c'est encouragé pour coconstruire le territoire. Garde-fous : aucun passe-droit commercial (respect de la commande publique) et déport des élus lors des votes d'attribution de marchés à DIX.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 5 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title border-2 border-dix-light bg-dix-light">PARTIE 5 : OPTIMISATIONS AVANCÉES</div>
+            <div class="faq-container border-dix-light border-2 border-t-0">
+                <div class="faq-item">
+                    <div class="faq-question">Télétravail et matériel (Le "bouclier TVA") <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>Indemnité Télétravail :</strong> ~53,50 €/mois versés 100 % nets et non imposables.</li>
+                                <li><strong>Achat de matériel :</strong> Vous achetez au nom de la coopérative. Vous récupérez les 20% de TVA et l'achat est déduit de votre base taxable. Un PC à 1 200 € TTC ne coûte que 1 000 € HT de budget brut.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Les Tickets-Restaurant (Arbitrage fiscal) <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Option sur demande. 60 % de la valeur du repas est payée par votre compte d'activité <strong>exonérée de toutes charges</strong>. Gain de pouvoir d'achat net direct par rapport à l'achat de repas avec de l'argent personnel taxé.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">L'optimisation par le contrat 39h <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Signer pour 39h permet de bénéficier de la défiscalisation des HS : exonération d'impôt et réduction de cotisations (~11 %). À budget égal, plus de cash "dans la poche".
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 6 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title">PARTIE 6 : SORTIE D'UN·E ASSOCIÉ·E</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Combien vaudra ma part à ma sortie ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Pas de spéculation en SCOP. Vos parts sont remboursées à leur <strong>valeur nominale (1 €)</strong>. Vous récupérez votre mise initiale, sans droit sur les réserves.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Y a-t-il un intérêt fiscal à acheter des parts ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Oui ! Dispositif <strong>Madelin (IR-PME)</strong> : réduction d'impôt de 18 % à 25 % du montant investi (si parts gardées 5 ans). Idéal pour transformer du surplus pro en patrimoine personnel défiscalisé.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARTIE 7 -->
+        <section class="faq-section">
+            <div class="faq-section-title font-title bg-gray-600">PARTIE 7 : « ET SI... ? » — QUESTIONS FRÉQUENTES</div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Et si je perds mes clients ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Utilisez votre trésorerie provisionnée pour maintenir votre salaire ("lissage"). Si elle s'épuise, réduction du temps de travail ou rupture conventionnelle pour ouvrir vos droits chômage classiques.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Et si je veux créer ma propre marque ? <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div class="faq-answer">
+                        <div class="answer-content">
+                            Possible comme nom d'usage (ex: "DIX via sa marque X"). Il est conseillé de définir par écrit la propriété de la marque en cas de départ futur.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GLOSSAIRE -->
+        <footer class="mt-12 pt-8 border-t border-gray-200">
+            <h3 class="text-xl text-dix-dark mb-4">Mini-Glossaire</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <p><strong>ESA :</strong> Entrepreneur·euse Salarié·e Associé·e (Contrat CESA).</p>
+                <p><strong>CAPE :</strong> Contrat d'Appui au Projet d'Entreprise (Phase de test).</p>
+                <p><strong>Part Travail :</strong> Participation aux bénéfices (défiscalisée si bloquée 5 ans).</p>
+                <p><strong>Réserves Impartageables :</strong> Trésor de guerre non distribuable.</p>
+                <p><strong>Révision Coopérative :</strong> Audit éthique obligatoire du modèle.</p>
+            </div>
+        </footer>
+
+    </main>
+
+    <div class="text-center py-8 text-gray-400 text-xs">
+        © 2026 DIX SCOP CAE - Document interne confidentiel
+    </div>
+
+    <script>
+        // Gestion des accordéons
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // Gestion de la recherche
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.faq-item').forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(term) || answer.includes(term)) {
+                    item.style.display = 'block';
+                    // Si on recherche, on ouvre les items correspondants
+                    if (term.length > 2) {
+                        item.classList.add('active');
+                    }
+                } else {
+                    item.style.display = 'none';
+                    item.classList.remove('active');
+                }
+            });
+
+            // Cacher les sections vides
+            document.querySelectorAll('.faq-section').forEach(section => {
+                const visibleItems = section.querySelectorAll('.faq-item[style="display: block;"]');
+                section.style.display = visibleItems.length > 0 ? 'block' : 'none';
+            });
+        });
+    </script>
+
+</body>
+</html>

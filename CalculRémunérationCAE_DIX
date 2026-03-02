@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur d'Arbitrage DIX SCOP CAE - ESA vs Micro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500&family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Georgia', serif; background-color: #f3f4f6; color: #1f2937; }
+        h1, h2, h3, .font-title { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        .bg-dix-dark { background-color: #405F59; }
+        .text-dix-dark { color: #405F59; }
+        .bg-dix-light { background-color: #549e39; }
+        .text-dix-light { color: #549e39; }
+        .border-dix { border-color: #405F59; }
+        .card-highlight { border: 2px solid #405F59; box-shadow: 0 10px 15px -3px rgba(64, 95, 89, 0.2); }
+        .progress-bar { height: 10px; border-radius: 5px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 0.5s ease-out; }
+        .waterfall-line { border-bottom: 1px dashed #e5e7eb; padding: 8px 0; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-dix-dark p-6 md:p-8 text-center text-white">
+            <div class="flex flex-row items-center justify-center mb-2">
+                <!-- Emplacement du logo (modifier "logo.png" si besoin) -->
+                <img src="logo.png" alt="Logo DIX SCOP CAE" class="h-16 md:h-20 mr-4 md:mr-6 object-contain" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+                <!-- Fallback texte si l'image ne charge pas (ex: dans l'aperçu) -->
+                <div id="fallback-logo" class="hidden mr-4 md:mr-6 text-2xl md:text-3xl font-title border-2 border-dix-light text-dix-light p-2 rounded-lg tracking-widest">DIX</div>
+                
+                <h1 class="text-xl md:text-2xl lg:text-3xl tracking-widest m-0 leading-none">
+                    <span class="text-dix-light font-bold">DIX SCOP CAE</span> <span class="mx-2 md:mx-3 text-gray-400 opacity-50">|</span> Arbitrage Stratégique : ESA vs Micro
+                </h1>
+            </div>
+            <p class="font-serif italic text-gray-200 text-sm md:text-base mt-4">Comparaison détaillée du régime micro / statut ESA : du Chiffre d'Affaires résiduel au "revenu net"</p>
+        </div>
+
+        <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- PANNEAU DE CONTRÔLE (Gaucher) -->
+            <div class="lg:col-span-4 space-y-8 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-inner">
+                
+                <!-- Section 1 : Budget -->
+                <div>
+                    <h2 class="text-xl text-dix-dark mb-4 border-b border-gray-300 pb-1 font-title font-bold">1. Chiffre d'Affaires Mensuel</h2>
+                    <label class="block text-sm font-bold mb-2 italic">Base de calcul (HT) :</label>
+                    <div class="relative">
+                        <input type="number" id="caInput" value="3000" step="100" class="w-full p-4 bg-white border border-gray-300 rounded-lg text-2xl font-bold text-dix-dark focus:ring-2 focus:ring-dix-light outline-none" oninput="calculate()">
+                        <span class="absolute right-4 top-4 text-gray-400">€</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 italic">* Pour isoler l'impact social/fiscal, la contribution coopérative DIX (20%) n'est pas déduite dans cette simulation. Les deux statuts partent du même montant brut.</p>
+                </div>
+
+                <!-- Section 2 : Frais -->
+                <div>
+                    <h2 class="text-xl text-dix-dark mb-4 border-b border-gray-300 pb-1 font-title font-bold">2. Frais & Télétravail</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Frais prof. mensuels (HT) :</label>
+                            <div class="relative">
+                                <input type="number" id="fraisHT" value="200" step="50" class="w-full p-3 bg-white border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-dix-light outline-none" oninput="calculate()">
+                                <span class="absolute right-4 top-3 text-gray-400 text-sm">€</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white rounded-lg border border-gray-200">
+                            <div class="flex items-center justify-between cursor-pointer">
+                                <span class="text-sm font-bold text-dix-dark">Indemnité Télétravail</span>
+                                <input type="checkbox" id="teleWorkActive" checked class="sr-only peer" onchange="calculate()">
+                                <label for="teleWorkActive" class="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:bg-dix-light relative cursor-pointer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></label>
+                            </div>
+                            <p id="teleExplication" class="text-[10px] text-green-700 mt-2 italic hidden"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3 : Tickets Resto -->
+                <div>
+                    <h2 class="text-xl text-dix-dark mb-4 border-b border-gray-300 pb-1 font-title font-bold">3. Tickets Restaurants</h2>
+                    <div class="p-4 bg-white rounded-lg border border-gray-200 space-y-4">
+                        <label class="flex items-center justify-between cursor-pointer">
+                            <span class="text-sm font-bold text-dix-dark">Activer les Titres-Resto</span>
+                            <input type="checkbox" id="trActive" checked class="sr-only peer" onchange="calculate()">
+                            <div class="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:bg-dix-light relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></div>
+                        </label>
+                        <div id="trInputs" class="space-y-3 pt-3 border-t border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">Nb Jours / mois :</span>
+                                <input type="number" id="trDays" value="20" class="w-16 p-2 border rounded text-sm text-center" oninput="calculate()">
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">Valeur Faciale :</span>
+                                <input type="number" id="trValue" value="12" class="w-16 p-2 border rounded text-sm text-center" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4 : Paramètres Avancés -->
+                <div>
+                    <h2 class="text-xl text-dix-dark mb-4 border-b border-gray-300 pb-1 font-title font-bold">4. Paramètres Avancés</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-4 bg-dix-dark text-white rounded-lg shadow-sm">
+                            <span class="font-bold text-sm">Optimisation 39h (ESA)</span>
+                            <input type="checkbox" id="opt39h" checked class="sr-only peer" onchange="calculate()">
+                            <label for="opt39h" class="w-12 h-6 bg-white/20 rounded-full peer-checked:bg-dix-light relative cursor-pointer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></label>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
+                            <div>
+                                <span class="font-bold text-sm block">Taux d'Imposition (PAS)</span>
+                                <span class="text-[10px] text-gray-500 italic block">Prélèvement à la source (%)</span>
+                            </div>
+                            <div class="relative w-20">
+                                <input type="number" id="tauxImpot" value="5" step="1" class="w-full p-2 border rounded text-sm text-center focus:ring-2 focus:ring-dix-light outline-none" oninput="calculate()">
+                                <span class="absolute right-2 top-2 text-gray-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
+                            <div>
+                                <span class="font-bold text-sm block">Chômage Micro (ATI)</span>
+                                <span class="text-[10px] text-gray-500 italic block">Simuler la faillite (très rare)</span>
+                            </div>
+                            <input type="checkbox" id="atiActive" class="sr-only peer" onchange="calculate()">
+                            <label for="atiActive" class="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-red-400 relative cursor-pointer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULTATS (Droit) -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- COLONNE MICRO -->
+                    <div class="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                        <div class="bg-gray-100 p-4 text-center border-b border-gray-200">
+                            <h3 class="font-title text-gray-600 text-lg tracking-wider">Statut Micro-Entrepreneur</h3>
+                        </div>
+                        <div class="p-6 space-y-2 flex-grow">
+                            <div class="waterfall-line flex justify-between text-sm">
+                                <span>Chiffre d'Affaires Mensuel (HT)</span>
+                                <span id="resCaMicro" class="font-bold text-gray-700">0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-red-500">
+                                <span>Frais Professionnels (TTC)</span>
+                                <span id="resFraisMicro">- 0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-red-500">
+                                <span>Cotisations Sociales (21.2%)</span>
+                                <span id="resUrssafMicro">- 0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-red-500">
+                                <span>Budget Repas (Payé en net)</span>
+                                <span id="resRepasMicro">- 0 €</span>
+                            </div>
+                            <div class="pt-6 flex justify-between items-end border-t-2 border-gray-800">
+                                <div>
+                                    <span class="text-sm font-bold uppercase">Net Avant Impôts</span><br>
+                                    <span class="text-xs text-gray-400 italic">Argent perçu</span>
+                                </div>
+                                <span id="netMicro" class="text-xl font-bold text-gray-600">0 €</span>
+                            </div>
+                            
+                            <!-- FISCALITÉ MICRO -->
+                            <div class="mt-6 bg-red-50 rounded-xl border border-red-100 p-5 space-y-3 shadow-inner">
+                                <div class="flex justify-between items-center border-b border-red-200 pb-2">
+                                    <span class="text-sm font-bold text-red-800">Base Imposable (Impôts)</span>
+                                    <span id="impotMicro" class="text-lg font-bold text-red-800">0 €</span>
+                                </div>
+                                <div class="flex justify-between items-center text-red-700">
+                                    <span class="text-sm" id="labelImpotMicro">Impôt Estimé (5%)</span>
+                                    <span id="valImpotMicro" class="font-bold">- 0 €</span>
+                                </div>
+                                <p class="text-[11px] text-red-600/80 italic leading-tight">
+                                    Calculé forfaitairement sur 66% de vos encaissements (statut BNC). L'État <strong>ne déduit pas</strong> vos frais professionnels réels du calcul de l'impôt.
+                                </p>
+                                <div class="flex justify-between items-center pt-3 border-t border-red-200">
+                                    <div>
+                                        <span class="text-sm font-bold uppercase text-red-900 block">Reste à vivre</span>
+                                        <span class="text-[10px] text-red-600 italic">Net dans la poche après impôts</span>
+                                    </div>
+                                    <span id="resteMicro" class="text-2xl font-bold text-red-900">0 €</span>
+                                </div>
+                            </div>
+
+                            <!-- Sécurité Micro -->
+                            <div class="mt-8 space-y-5">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2">
+                                        <span>Couverture Chômage (ATI)</span>
+                                        <span id="areMicro" class="font-bold text-red-600">0 €</span>
+                                    </div>
+                                    <div class="progress-bar"><div id="barAreMicro" class="progress-fill bg-red-400" style="width: 0%"></div></div>
+                                    <p id="atiExplication" class="text-[10px] mt-1 italic"></p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2">
+                                        <span>Retraite Mensuelle (Base+RCI)</span>
+                                        <span id="pensionMicro" class="font-bold text-red-600">0 €</span>
+                                    </div>
+                                    <div class="progress-bar"><div id="barRetraiteMicro" class="progress-fill bg-red-400" style="width: 30%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLONNE ESA -->
+                    <div class="bg-white card-highlight rounded-xl overflow-hidden relative flex flex-col">
+                        <div class="bg-dix-dark p-4 text-center text-white">
+                            <h3 class="font-title text-lg tracking-widest">Contrat E.S.A. (DIX)</h3>
+                        </div>
+                        <div class="p-6 space-y-2 flex-grow">
+                            <div class="waterfall-line flex justify-between text-sm">
+                                <span>Chiffre d'Affaires Mensuel (HT)</span>
+                                <span id="resCaEsa" class="font-bold text-gray-700">0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-dix-light">
+                                <span>Frais Professionnels (HT)</span>
+                                <span id="resFraisEsa">- 0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-dix-light">
+                                <span>Cotisations (Patronales + Salariales)</span>
+                                <span id="resUrssafEsa">- 0 €</span>
+                            </div>
+                            <div class="waterfall-line flex justify-between text-sm text-green-600 font-bold">
+                                <span>Budget Repas (Financé HT via TR)</span>
+                                <span id="resRepasEsa">- 0 €</span>
+                            </div>
+                            <div class="pt-6 flex justify-between items-start border-t-2 border-dix-dark">
+                                <div>
+                                    <span class="text-sm font-bold text-dix-dark uppercase">Net Avant Impôts</span><br>
+                                    <span class="text-xs text-gray-400 italic">Argent perçu</span>
+                                </div>
+                                <div class="text-right" id="netEsaContainer">
+                                    <span id="netEsa" class="text-xl font-bold text-dix-dark">0 €</span>
+                                    <div id="teleDetail" class="text-[11px] text-gray-500 italic mt-1 hidden"></div>
+                                </div>
+                            </div>
+
+                            <!-- FISCALITÉ ESA -->
+                            <div class="mt-6 bg-green-50 rounded-xl border border-green-100 p-5 space-y-3 shadow-inner">
+                                <div class="flex justify-between items-center border-b border-green-200 pb-2">
+                                    <span class="text-sm font-bold text-green-800">Base Imposable (Impôts)</span>
+                                    <span id="impotEsa" class="text-lg font-bold text-green-800">0 €</span>
+                                </div>
+                                <div class="flex justify-between items-center text-green-700">
+                                    <span class="text-sm" id="labelImpotEsa">Impôt Estimé (5%)</span>
+                                    <span id="valImpotEsa" class="font-bold">- 0 €</span>
+                                </div>
+                                <p class="text-[11px] text-green-700/80 italic leading-tight">
+                                    Vos frais ont été payés en amont par la coopérative. De plus, la rémunération liée à vos heures supplémentaires et à votre télétravail est <strong>100% défiscalisée</strong>.
+                                </p>
+                                <div class="flex justify-between items-center pt-3 border-t border-green-200">
+                                    <div>
+                                        <span class="text-sm font-bold uppercase text-green-900 block">Reste à vivre</span>
+                                        <span class="text-[10px] text-green-700 italic">Net dans la poche après impôts</span>
+                                    </div>
+                                    <span id="resteEsa" class="text-2xl font-bold text-green-900">0 €</span>
+                                </div>
+                            </div>
+
+                            <!-- Sécurité ESA -->
+                            <div class="mt-8 space-y-5">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2 text-dix-dark">
+                                        <span>Droit au Chômage (ARE)</span>
+                                        <span id="areEsa" class="font-bold">0 € / mois</span>
+                                    </div>
+                                    <div class="progress-bar"><div id="barAreEsa" class="progress-fill bg-dix-light" style="width: 75%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2 text-dix-dark">
+                                        <span>Retraite Mensuelle (Cadre)</span>
+                                        <span id="pensionEsa" class="font-bold">0 € / mois</span>
+                                    </div>
+                                    <div class="progress-bar"><div id="barRetraiteEsa" class="progress-fill bg-dix-light" style="width: 85%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYSE DE VALEUR PATRIMONIALE -->
+                <div class="bg-dix-dark rounded-xl p-8 text-white shadow-lg mt-8">
+                    <h3 class="font-title text-2xl mb-8 text-center tracking-widest border-b border-dix-light/30 pb-4">Synthèse Patrimoniale Mensuelle (Après Impôts)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div class="p-5 bg-white/5 rounded-lg border border-white/10">
+                            <span class="block text-sm text-gray-300 mb-2 uppercase tracking-wider">Écart de Net Immédiat</span>
+                            <span id="coutSecu" class="text-3xl font-bold text-red-300">0 €</span>
+                            <p class="text-xs mt-3 italic text-gray-400">Différence de cash réel final.</p>
+                        </div>
+                        <div class="p-5 bg-white/10 rounded-lg border border-dix-light/30">
+                            <span class="block text-sm text-gray-300 mb-2 uppercase tracking-wider">Gain de Droits Sociaux</span>
+                            <span id="capitalSocial" class="text-3xl font-bold text-yellow-400">0 €</span>
+                            <p class="text-xs mt-3 italic text-gray-400" id="gainSocialDesc">Valeur nette du capital de protection acquis.</p>
+                        </div>
+                        <div class="p-5 bg-white/5 rounded-lg border border-white/10">
+                            <span class="block text-sm text-gray-300 mb-2 uppercase tracking-wider">Rentabilité du Statut</span>
+                            <span id="beneficeTotal" class="text-3xl font-bold text-green-400">0 €</span>
+                            <p class="text-xs mt-3 italic text-gray-400" id="rentabiliteDesc">Gain réel net (Droits gagnés - Écart cash).</p>
+                        </div>
+                    </div>
+
+                    <!-- ENCADRÉS EXPLICATIFS -->
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white/5 p-4 rounded text-[11px] border border-white/5">
+                            <strong class="text-yellow-400 font-title uppercase block mb-1">Le Piège de l'Impôt</strong>
+                            En Micro, l'impôt est calculé sur 66% du CA brut. En ESA (39h), les heures supplémentaires sont défiscalisées. Votre revenu imposable est largement inférieur au cash perçu !
+                        </div>
+                        <div class="bg-white/5 p-4 rounded text-[11px] border border-white/5">
+                            <strong class="text-yellow-400 font-title uppercase block mb-1">Le Bouclier TVA</strong>
+                            En ESA, vos frais prof. sont déduits en HT. Pour 1 000€ d'achats, l'ESA économise 200€ de TVA que le micro-entrepreneur paie avec son net.
+                        </div>
+                        <div class="bg-white/5 p-4 rounded text-[11px] border border-white/5">
+                            <strong class="text-yellow-400 font-title uppercase block mb-1">L'Opération Repas</strong>
+                            En ESA, 60% de la valeur des Tickets Restos échappe aux cotisations et impôts. En Micro, 100% de la nourriture est payée par l'argent déjà taxé.
+                        </div>
+                        <div class="bg-white/5 p-4 rounded text-[11px] border border-white/5">
+                            <strong class="text-yellow-400 font-title uppercase block mb-1">Maladie & Parentalité</strong>
+                            En ESA, vos indemnités journalières de la CPAM assurent le maintien de votre salaire. En Micro, un arrêt de travail entraîne une chute de revenus.
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-5 bg-white/10 rounded-lg text-center border border-dix-light/20 text-white italic text-sm">
+                        <p id="conclusion"></p>
+                    </div>
+                </div>
+                
+                <!-- MÉTHODOLOGIE DES CALCULS -->
+                <div class="bg-gray-100 rounded-xl p-8 border border-gray-200 text-sm text-gray-700 mt-8">
+                    <h3 class="font-title text-xl text-dix-dark mb-4 uppercase">Comprendre les méthodes de calcul</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-2 border-b border-gray-300 pb-1">Côté Micro-Entreprise</h4>
+                            <ul class="list-disc pl-4 space-y-2">
+                                <li><strong>Cotisations :</strong> Calculées forfaitairement à <strong>21,2 %</strong> (taux libéral actuel avec CFP) sur l'intégralité du Chiffre d'Affaires encaissé, avant toute déduction de frais.</li>
+                                <li><strong>Frais & TVA :</strong> Le micro-entrepreneur ne récupère pas la TVA. Les achats (ex: 1 000 € HT) lui coûtent 1 200 € TTC, prélevés sur son "Net".</li>
+                                <li><strong>Repas :</strong> Payés intégralement avec de l'argent ayant déjà subi les cotisations et l'impôt sur le revenu.</li>
+                                <li><strong>Chômage (ATI) :</strong> 800 € pendant 6 mois maximum, sous condition très stricte de faillite (liquidation judiciaire ou baisse d'activité de 30%).</li>
+                                <li><strong>Base Imposable (Impôts) :</strong> Calculée forfaitairement sur 66 % du Chiffre d'Affaires brut (abattement de 34 % en BNC), sans tenir compte des dépenses réelles engagées.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-dix-dark mb-2 border-b border-gray-300 pb-1">Côté Coopérative (ESA)</h4>
+                            <ul class="list-disc pl-4 space-y-2">
+                                <li><strong>Cotisations (La Cascade) :</strong> Calculées sur le "Super-Brut" (CA HT - Frais HT). Les cotisations patronales (lissées de 18% à 43% selon les allègements sur les bas salaires) permettent de déterminer le "Salaire Brut". Puis les cotisations salariales (~22%) sont déduites pour obtenir le Net.</li>
+                                <li><strong>Avantages Défiscalisés :</strong> L'indemnité Télétravail (100% nette) et la part employeur des Tickets Restaurants (60%) sont prises sur le budget *avant* cotisations, générant du pouvoir d'achat net sans taxes.</li>
+                                <li><strong>Optimisation 39h :</strong> En déclarant 39h, les 4 heures supplémentaires (qui représentent mathématiquement 12,5% du brut majoré) sont totalement exonérées d'impôt sur le revenu et bénéficient d'une réduction de cotisations salariales.</li>
+                                <li><strong>Droits Sociaux :</strong> Chômage (ARE) garanti et proportionnel au salaire brut (~57%) sur 18 mois. Retraite calculée sur le régime général + complémentaire cadre Agirc-Arrco (estimée à ~60% du brut en carrière complète).</li>
+                                <li><strong>Base Imposable (Impôts) :</strong> C'est votre salaire net perçu, <em>moins</em> la valorisation de vos heures supplémentaires défiscalisées et de votre indemnité télétravail. Le montant imposable s'effondre.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-6 text-center italic">* Note : Ce simulateur est un outil pédagogique à vocation comparative. Les cotisations réelles de paie peuvent très légèrement varier en fonction des mises à jour annuelles du Plafond de la Sécurité Sociale (PASS) ou des cotisations mutuelle de branche.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const format = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+
+        function calculate() {
+            const baseCA = parseFloat(document.getElementById('caInput').value) || 0;
+            const fraisHT = parseFloat(document.getElementById('fraisHT').value) || 0;
+            const opt39h = document.getElementById('opt39h').checked;
+            const teleActive = document.getElementById('teleWorkActive').checked;
+            const trActive = document.getElementById('trActive').checked;
+            const atiActive = document.getElementById('atiActive').checked;
+            
+            // Taux d'imposition
+            const tauxImpot = parseFloat(document.getElementById('tauxImpot').value) || 0;
+            const tauxDecimal = tauxImpot / 100;
+            
+            // --- MICRO ---
+            const chargesMicro = baseCA * 0.212; // Actualisé à 21.2% (Taux BNC + CFP 2025)
+            const fraisTTC = fraisHT * 1.20; 
+            const trDays = parseInt(document.getElementById('trDays').value) || 20;
+            const trValue = parseFloat(document.getElementById('trValue').value) || 12;
+            const coutRepasMicro = trActive ? (trDays * trValue) : 0;
+            
+            // Net Avant Impots = CA - URSSAF - Frais - Repas
+            const netMicroFinal = baseCA - chargesMicro - fraisTTC - coutRepasMicro;
+            
+            // Base Imposable Micro (Abattement forfaitaire BNC 34% -> 66% imposable)
+            const baseImposableMicro = baseCA * 0.66;
+            const impotMicroMensuel = baseImposableMicro * tauxDecimal;
+            const resteMicro = netMicroFinal - impotMicroMensuel;
+            
+            // Droits Micro (ATI conditionnelle)
+            let atiMicro = 0;
+            if (atiActive && (baseCA * 12) > 10000) {
+                atiMicro = 800;
+            }
+            const pensionMicro = Math.min(1900, (baseCA * 0.27));
+
+            // Affichage Micro
+            document.getElementById('resCaMicro').innerText = format(baseCA);
+            document.getElementById('resUrssafMicro').innerText = "- " + format(chargesMicro);
+            document.getElementById('resFraisMicro').innerText = "- " + format(fraisTTC);
+            document.getElementById('resRepasMicro').innerText = "- " + format(coutRepasMicro);
+            document.getElementById('netMicro').innerText = format(netMicroFinal);
+            
+            document.getElementById('impotMicro').innerText = format(baseImposableMicro);
+            document.getElementById('labelImpotMicro').innerText = `Impôt Estimé (${tauxImpot}%)`;
+            document.getElementById('valImpotMicro').innerText = "- " + format(impotMicroMensuel);
+            document.getElementById('resteMicro').innerText = format(resteMicro);
+            
+            document.getElementById('areMicro').innerText = atiActive ? format(atiMicro) + " (Max)" : "0 €";
+            
+            const atiExplicationEl = document.getElementById('atiExplication');
+            if (atiActive) {
+                atiExplicationEl.innerHTML = "Activé : Sous conditions strictes de faillite.";
+                atiExplicationEl.className = "text-[10px] mt-1 italic text-gray-500";
+            } else {
+                atiExplicationEl.innerHTML = "Désactivé : Cas réel le plus fréquent (Aucune couverture).";
+                atiExplicationEl.className = "text-[10px] mt-1 italic text-red-500 font-bold";
+            }
+
+            document.getElementById('pensionMicro').innerText = format(pensionMicro);
+
+            // --- ESA ---
+            const indemniteTele = teleActive ? 53.50 : 0;
+            const trPartPatronale = trActive ? (trValue * 0.6 * trDays) : 0;
+            const trPartSalariale = trActive ? (trValue * 0.4 * trDays) : 0;
+            const valeurTotaleTR = trActive ? (trValue * trDays) : 0;
+            
+            // L'assiette pour calculer les cotisations patronales
+            const budgetSalairePatronal = baseCA - fraisHT - indemniteTele - trPartPatronale;
+            
+            // Taux lissés de cotisations patronales (Mime la réduction Fillon par paliers progressifs)
+            let getTauxPatronal = (budget) => {
+                if (budget < 2200) return 0.18; // Forts allègements proches du SMIC
+                if (budget < 3200) return 0.32; // Disparition progressive de la réduction
+                return 0.43; // Taux plein
+            };
+
+            // Calcul SIMULÉ "SANS TELE" pour démontrer le gain réel (pédagogique)
+            const budgetSalairePatronalSansTele = baseCA - fraisHT - 0 - trPartPatronale;
+            let tauxPatronalSans = getTauxPatronal(budgetSalairePatronalSansTele);
+            let tauxSalarialSans = opt39h ? 0.205 : 0.22; // Légère baisse du taux salarial global en 39h
+            const brutSansTele = Math.max(0, budgetSalairePatronalSansTele / (1 + tauxPatronalSans));
+            const netSalaireSansTele = (brutSansTele * (1 - tauxSalarialSans)) - trPartSalariale;
+            const netEsaFinalSansTele = netSalaireSansTele + 0;
+
+            // Taux réels avec indemnité
+            let tauxPatronal = getTauxPatronal(budgetSalairePatronal);
+            let tauxSalarial = opt39h ? 0.205 : 0.22; 
+
+            // Déduction du brut et du net
+            const brut = Math.max(0, budgetSalairePatronal / (1 + tauxPatronal));
+            const netSalaire = (brut * (1 - tauxSalarial)) - trPartSalariale;
+            
+            // Cotisations Globales (Patronales + Salariales)
+            const totalCotisationsEsa = (budgetSalairePatronal - brut) + (brut * tauxSalarial);
+            
+            // Net Avant Impôts
+            const netEsaFinal = netSalaire + indemniteTele;
+
+            // Calcul de la Base Imposable ESA
+            // Le salaire net est amputé des heures supp défiscalisées (~12.5% du brut majoré après prise en compte CSG déductible, on estime la valeur nette de l'HS à ~78% de son brut)
+            // On rajoute la CSG non-déductible et la part mutuelle patronale (~3.5% du brut)
+            const valeurHeuresSuppDefiscalisees = opt39h ? (brut * 0.125 * 0.78) : 0;
+            const csgNonDeductible = brut * 0.035;
+            // L'indemnité télétravail n'est pas dans le netSalaire de base, donc elle est déjà exclue !
+            const baseImposableEsa = Math.max(0, netSalaire - valeurHeuresSuppDefiscalisees + csgNonDeductible);
+            const impotEsaMensuel = baseImposableEsa * tauxDecimal;
+            const resteEsa = netEsaFinal - impotEsaMensuel;
+
+            // Affichage Base Imposable ESA
+            document.getElementById('impotEsa').innerText = format(baseImposableEsa);
+            document.getElementById('labelImpotEsa').innerText = `Impôt Estimé (${tauxImpot}%)`;
+            document.getElementById('valImpotEsa').innerText = "- " + format(impotEsaMensuel);
+            document.getElementById('resteEsa').innerText = format(resteEsa);
+
+            // Explication dynamique Télétravail
+            const teleExplicationEl = document.getElementById('teleExplication');
+            if (teleActive && brut > 0) {
+                const gainNetTele = netEsaFinal - netEsaFinalSansTele;
+                teleExplicationEl.innerHTML = `💡 En évitant l'URSSAF, vous gagnez <strong>+ ${format(gainNetTele)} nets réels</strong> par rapport à un salaire équivalent.`;
+                teleExplicationEl.classList.remove('hidden');
+            } else {
+                teleExplicationEl.classList.add('hidden');
+            }
+
+            // Droits ESA
+            const areEsa = brut * 0.57; 
+            const pensionEsa = (brut * 0.60); // Ajusté à 60% pour une estimation prudente carrière complète
+
+            // Affichage ESA
+            document.getElementById('resCaEsa').innerText = format(baseCA);
+            document.getElementById('resFraisEsa').innerText = "- " + format(fraisHT);
+            document.getElementById('resUrssafEsa').innerText = "- " + format(totalCotisationsEsa);
+            document.getElementById('resRepasEsa').innerText = "- " + format(valeurTotaleTR);
+            
+            document.getElementById('netEsa').innerText = format(netEsaFinal);
+            const teleDetailEl = document.getElementById('teleDetail');
+            if (indemniteTele > 0) {
+                teleDetailEl.innerText = `(dont ${format(indemniteTele)} Télétravail)`;
+                teleDetailEl.classList.remove('hidden');
+            } else {
+                teleDetailEl.classList.add('hidden');
+            }
+
+            document.getElementById('areEsa').innerText = format(areEsa);
+            document.getElementById('pensionEsa').innerText = format(pensionEsa);
+            
+            // --- ANALYSE PATRIMOINE ---
+            // On calcule l'écart de net sur le RESTE À VIVRE RÉEL (après impôts)
+            const diffNetImmediat = resteMicro - resteEsa;
+            const gainAre = areEsa - atiMicro;
+            const gainPension = pensionEsa - pensionMicro;
+            const gainSecuTotal = gainAre + gainPension;
+
+            document.getElementById('coutSecu').innerText = format(Math.max(0, diffNetImmediat));
+            
+            // Gestion des textes "Minimum" en fonction du statut de l'ATI
+            if (atiActive) {
+                document.getElementById('capitalSocial').innerHTML = format(gainSecuTotal) + ' <span class="text-lg font-normal opacity-80">(min.)</span>';
+                document.getElementById('beneficeTotal').innerHTML = format(gainSecuTotal - Math.max(0, diffNetImmediat)) + ' <span class="text-lg font-normal opacity-80">(min.)</span>';
+                document.getElementById('gainSocialDesc').innerText = "Valeur minimale du capital acquis (l'ATI Micro étant rare en pratique).";
+                document.getElementById('rentabiliteDesc').innerText = "Gain réel net minimum (Droits gagnés - Écart cash).";
+            } else {
+                document.getElementById('capitalSocial').innerHTML = format(gainSecuTotal);
+                document.getElementById('beneficeTotal').innerHTML = format(gainSecuTotal - Math.max(0, diffNetImmediat));
+                document.getElementById('gainSocialDesc').innerText = "Valeur nette du capital de protection acquis.";
+                document.getElementById('rentabiliteDesc').innerText = "Gain réel net (Droits gagnés - Écart cash).";
+            }
+
+            // Jauges adaptées pour éviter les dépassements trop rapides visuellement
+            document.getElementById('barAreEsa').style.width = Math.min(100, (areEsa / 3000) * 100) + '%';
+            document.getElementById('barRetraiteEsa').style.width = Math.min(100, (pensionEsa / 3000) * 100) + '%';
+            document.getElementById('barAreMicro').style.width = Math.min(100, (atiMicro / 3000) * 100) + '%';
+            document.getElementById('barRetraiteMicro').style.width = Math.min(100, (pensionMicro / 3000) * 100) + '%';
+
+            const conclusion = document.getElementById('conclusion');
+            if (diffNetImmediat > 0) {
+                let minMention = atiActive ? "au minimum " : "";
+                let rareMention = atiActive ? " (l'ATI Micro étant très rare en pratique)" : "";
+                conclusion.innerHTML = `
+                    À Chiffre d'Affaires identique, vous percevez <strong>${format(diffNetImmediat)}</strong> de moins en "cash final", mais l'ESA génère 
+                    <strong>${minMention}${format(gainSecuTotal)}</strong> de droits sociaux supplémentaires${rareMention}. 
+                    <br><strong>Pour chaque 1€ de cash différé, vous gagnez ${minMention}${((gainSecuTotal/diffNetImmediat)).toFixed(1)}€ en capital sécurité.</strong>
+                `;
+            } else {
+                conclusion.innerHTML = "Après impôts, l'ESA est plus rentable que la Micro en pouvoir d'achat immédiat ET en sécurité sociale !";
+            }
+        }
+
+        calculate();
+    </script>
+</body>
+</html>
