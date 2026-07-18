@@ -109,6 +109,11 @@
             background-size: 1rem;
             padding-right: 2.5rem !important;
         }
+
+        /* NOUVEAU : Filtre pour rendre la carte française grise et élégante */
+        .french-map-tiles {
+            filter: grayscale(100%) opacity(60%) contrast(1.1);
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -170,7 +175,7 @@
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_4bPCRFK_gGVkxP-ZeTHzLauhQtqNg_zG2chKNuY8-iyDAuHjc_CQbpBCU4LY9-GRi1579CsUkhr/pub?gid=917397259&single=true&output=csv";
         
-        // Configuration stricte des 13 colonnes alignée sur votre nouvelle formule
+        // CORRECTION MAJEURE : Les 13 vraies colonnes (de 0 à 12) après l'ajout de l'Adresse
         let COLS = { 
             ANNEE: 0, REGION: 1, LOGO: 2, CLIENT: 3, TYPE: 4, CATEGORIE: 5, 
             TITRE: 6, DESC: 7, 
@@ -216,9 +221,13 @@
 
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([46.80, 2.50], 6);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap'
+            
+            // NOUVEAU : Serveur OpenStreetMap France avec classe CSS pour le rendre gris
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap France',
+                className: 'french-map-tiles'
             }).addTo(map);
+            
             L.control.zoom({ position: 'bottomright' }).addTo(map);
             markersLayer = L.layerGroup().addTo(map);
         }
