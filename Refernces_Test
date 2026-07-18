@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D.I.X. Autrement - Nos Références</title>
+    
+    <!-- Polices Charte D.I.X. -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Georgia&display=swap" rel="stylesheet">
+    
+    <!-- Bibliothèques externes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --dix-dark-green: #405F59;
+            --dix-light-green: #549e39;
+            --dix-white-grey: #f3f3f3;
+        }
+        body { 
+            font-family: 'Georgia', serif; 
+            color: var(--dix-dark-green); 
+            overflow: hidden; 
+            background-color: white; 
+            height: 100vh; 
+        }
+        h1, h2, h3, h4, .font-oswald { 
+             font-family: 'Oswald', sans-serif; 
+             text-transform: uppercase;
+             font-weight: 400;
+        }
+        
+        #map { height: 100%; width: 100%; background: #f8fafc; z-index: 1; }
+        
+        /* Barre de défilement discrète */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--dix-light-green); border-radius: 10px; }
+        
+        /* Style Accordéon */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .active-card .accordion-content {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+        .active-card { 
+             border-left: 8px solid var(--dix-light-green) !important; 
+             background-color: white !important; 
+             box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+             transform: scale(1.01);
+        }
+        .marker-dot { transition: all 0.3s ease; cursor: pointer; }
+        
+        /* Badge Logo sur la carte */
+        .map-logo-badge {
+            background: white;
+            border: 2px solid var(--dix-light-green);
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            min-height: 40px;
+            max-width: 120px;
+        }
+        .leaflet-tooltip-pane .leaflet-tooltip {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        
+        header { 
+             position: sticky; 
+             top: 0; 
+             background: white; 
+             z-index: 100; 
+             flex-shrink: 0;
+             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        /* Bouton Vue Générale personnalisé */
+        .map-control-btn {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .map-control-btn:hover { background: #f4f4f4; }
+        /* Ajustements Selects */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23405F59'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem !important;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+    <!-- HEADER / FILTRES -->
+    <header class="border-b bg-white">
+        <div class="flex flex-col md:flex-row items-center w-full px-8 py-5 gap-6">
+            <div class="w-full md:w-1/4">
+                <h1 class="text-3xl md:text-4xl tracking-widest text-[var(--dix-dark-green)] font-oswald">Nos Références</h1>
+                <div class="w-20 h-1.5 mt-1 bg-[var(--dix-light-green)]"></div>
+            </div>
+            
+            <div class="flex-1 flex flex-wrap gap-3 justify-end items-center">
+                <div class="relative flex-grow max-w-[250px]">
+                    <input type="text" id="searchInput" placeholder="Rechercher..." 
+                        class="w-full pl-10 pr-4 py-2.5 border rounded-full text-sm outline-none focus:ring-2 focus:ring-[var(--dix-light-green)] border-gray-200 bg-[var(--dix-white-grey)] shadow-inner">
+                    <i data-lucide="search" class="absolute left-3.5 top-3 text-gray-400 w-4 h-4"></i>
+                </div>
+                
+                <select id="themeFilter" class="px-4 py-2.5 border rounded-full text-[10px] uppercase tracking-widest outline-none bg-white border-gray-200 cursor-pointer hover:border-[var(--dix-light-green)] transition-colors min-w-[160px]">
+                    <option value="">Toutes thématiques</option>
+                </select>
+                <select id="typeFilter" class="px-4 py-2.5 border rounded-full text-[10px] uppercase tracking-widest outline-none bg-white border-gray-200 cursor-pointer hover:border-[var(--dix-light-green)] transition-colors min-w-[140px]">
+                    <option value="">Types porteurs</option>
+                </select>
+                <select id="yearFilter" class="px-4 py-2.5 border rounded-full text-[10px] uppercase tracking-widest outline-none bg-white border-gray-200 cursor-pointer hover:border-[var(--dix-light-green)] transition-colors min-w-[110px]">
+                    <option value="">Toutes années</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- SIDEBAR -->
+        <div id="sidebar" class="w-full h-1/2 md:h-auto md:w-1/2 bg-[var(--dix-white-grey)]/40 border-r overflow-y-auto custom-scroll p-8 space-y-6">
+            <div id="loader" class="flex flex-col items-center justify-center py-20 text-gray-400 text-center px-4">
+                <div id="loaderIcon" class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--dix-light-green)] mb-4"></div>
+                <p id="loaderStatus" class="text-sm uppercase tracking-widest font-bold">Chargement des références...</p>
+                <p id="errorHint" class="hidden mt-4 text-xs text-red-500 max-w-xs">Impossible de télécharger les données. Le fichier Google n'est peut-être pas public ou le format a changé.</p>
+            </div>
+            <div id="resultsList" class="space-y-6 hidden"></div>
+        </div>
+
+        <!-- ZONE CARTE -->
+        <div class="flex-1 relative overflow-hidden">
+            <div id="map"></div>
+            <div class="absolute bottom-24 right-3 z-[1000]">
+                <button onclick="resetView()" class="map-control-btn" title="Vue Générale">
+                    <i data-lucide="maximize" class="w-5 h-5 text-[var(--dix-dark-green)]"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-3 text-[10px] uppercase tracking-[0.5em] text-center text-gray-400 font-oswald flex-shrink-0">
+        D.I.X. Autrement — Modélisation & Évaluation de circuits de proximité
+    </footer>
+
+    <script>
+        // Utilisation de l'URL GViz API pour contourner les erreurs de fichier inaccessible (CORS)
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/1BkUT6wt-XwqU_75leF2U2l02YxR100ppLmVmew6jM_k/gviz/tq?tqx=out:csv&gid=917397259";
+        
+        // Ordre des colonnes selon la formule ARRAYFORMULA(C1:H \ K1:L \ N1:P \ T1:U)
+        let COLS = { 
+            ANNEE: 0, REGION: 1, LOGO: 2, CLIENT: 3, TYPE: 4, CATEGORIE: 5, 
+            TITRE: 6, DESC: 7, 
+            ADRESSE: 8, CP: 9, VILLE: 10, 
+            LAT: 11, LNG: 12 
+        };
+        
+        let allData = [];
+        let map, markersLayer;
+        let activeMarker = null;
+
+        // Sécurisation du texte pour éviter des bugs d'affichage HTML
+        function escapeHtml(unsafe) {
+            return (unsafe || "").toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function refreshIcons() {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function updateLoaderStatus(status, isError = false) {
+            const statusEl = document.getElementById('loaderStatus');
+            const hintEl = document.getElementById('errorHint');
+            const loaderIcon = document.getElementById('loaderIcon');
+            
+            if (statusEl) statusEl.textContent = status;
+            if (isError) {
+                if (hintEl) hintEl.classList.remove('hidden');
+                if (loaderIcon) loaderIcon.classList.add('hidden');
+            }
+        }
+
+        window.onload = function() {
+            refreshIcons();
+            initMap();
+            loadData();
+        };
+
+        function initMap() {
+            // Fond de carte moderne CartoDB (affiche les noms en langue locale, donc en Français pour la France)
+            map = L.map('map', { zoomControl: false }).setView([46.80, 2.50], 6);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+        }
+
+        function cleanUrl(text) {
+            if (!text) return null;
+            let url = String(text).trim();
+            const match = url.match(/["'](http[^"']+)["']/i);
+            return match ? match[1] : (url.startsWith('http') ? url : null);
+        }
+
+        function loadData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (!results.data || results.data.length < 2) {
+                        updateLoaderStatus("Erreur de chargement", true);
+                        return;
+                    }
+                    const rows = results.data.slice(1); // Ignorer les entêtes
+                    
+                    allData = rows.map((row, index) => {
+                        // Nettoyage des coordonnées
+                        const lat = parseFloat(String(row[COLS.LAT] || "").replace(',', '.').replace(/\s/g, ''));
+                        const lng = parseFloat(String(row[COLS.LNG] || "").replace(',', '.').replace(/\s/g, ''));
+                        if (isNaN(lat) || isNaN(lng)) return null;
+                        
+                        // Récupération de l'année (et nettoyage des sauts de lignes éventuels)
+                        let yearRaw = row[COLS.ANNEE] || "";
+                        let yearDisplay = yearRaw.split('\n')[0].trim();
+                        
+                        return {
+                            id: index,
+                            year: yearDisplay,
+                            region: row[COLS.REGION] || "",
+                            logo: cleanUrl(row[COLS.LOGO]),
+                            client: row[COLS.CLIENT] || "Client",
+                            typePorteur: row[COLS.TYPE] || "Autre",
+                            category: row[COLS.CATEGORIE] || "MISSION",
+                            title: row[COLS.TITRE] || "Sans titre",
+                            desc: row[COLS.DESC] || "",
+                            adresse: row[COLS.ADRESSE] || "",
+                            cp: row[COLS.CP] || "",
+                            city: row[COLS.VILLE] || "",
+                            lat: lat, 
+                            lng: lng
+                        };
+                    }).filter(Boolean);
+                    
+                    renderFilters();
+                    render(allData);
+                    
+                    // Masquer le loader
+                    document.getElementById('loader').classList.add('hidden');
+                    document.getElementById('resultsList').classList.remove('hidden');
+                },
+                error: (err) => {
+                    console.error("Erreur téléchargement:", err);
+                    updateLoaderStatus("Fichier inaccessible", true);
+                }
+            });
+        }
+
+        function renderFilters() {
+            const categories = [...new Set(allData.map(d => d.category))].filter(Boolean).sort();
+            const themeSelect = document.getElementById('themeFilter');
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c.toUpperCase();
+                themeSelect.appendChild(opt);
+            });
+
+            const types = [...new Set(allData.map(d => d.typePorteur))].filter(Boolean).sort();
+            const typeSelect = document.getElementById('typeFilter');
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t; opt.textContent = t.toUpperCase();
+                typeSelect.appendChild(opt);
+            });
+
+            let years = [...new Set(allData.map(d => d.year))].filter(Boolean);
+            years.sort((a, b) => {
+                // Forcer "En cours" tout en haut
+                if (a.toLowerCase() === "en cours") return -1;
+                if (b.toLowerCase() === "en cours") return 1;
+                return b.localeCompare(a); // Ordre décroissant pour les dates
+            });
+            
+            const yearSelect = document.getElementById('yearFilter');
+            years.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y; opt.textContent = y.toUpperCase();
+                yearSelect.appendChild(opt);
+            });
+        }
+
+        function render(data) {
+            const listContainer = document.getElementById('resultsList');
+            listContainer.innerHTML = '';
+            markersLayer.clearLayers();
+            const bounds = [];
+            
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `card-${item.id}`;
+                card.className = "bg-white rounded-2xl cursor-pointer transition-all duration-300 border border-gray-100 p-6 group";
+                
+                const clientEscaped = escapeHtml(item.client);
+                const initialEscaped = escapeHtml(item.client.charAt(0));
+                
+                // Préparation de l'adresse combinée (Rue + CP + Ville)
+                let displayAddress = "";
+                if(item.adresse) displayAddress += escapeHtml(item.adresse) + ", ";
+                if(item.cp) displayAddress += escapeHtml(item.cp) + " ";
+                if(item.city) displayAddress += escapeHtml(item.city);
+
+                // Gestion du logo ou de l'initiale par défaut
+                let logoHtml;
+                if (item.logo && item.logo.trim() !== "") {
+                    // onerror permet de basculer sur l'initiale si l'URL de l'image est invalide
+                    logoHtml = `<img src="${escapeHtml(item.logo)}" onerror="this.onerror=null; this.outerHTML='<div class=\\'text-[var(--dix-dark-green)] opacity-20 font-oswald text-3xl w-full h-full flex items-center justify-center\\'>${initialEscaped}</div>'" class="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all">`;
+                } else {
+                    logoHtml = `<div class="text-[var(--dix-dark-green)] opacity-20 font-oswald text-3xl w-full h-full flex items-center justify-center">${initialEscaped}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-6">
+                        <div class="w-24 h-24 bg-gray-50 rounded-xl flex items-center justify-center p-3 border border-gray-50 flex-shrink-0">
+                            ${logoHtml}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="text-xl font-bold text-[var(--dix-dark-green)] font-oswald leading-tight uppercase">${clientEscaped}</h4>
+                                <span class="text-xs font-bold px-3 py-1 bg-gray-100 rounded-full group-hover:bg-[var(--dix-light-green)] group-hover:text-white transition-colors">${escapeHtml(item.year)}</span>
+                            </div>
+                            <div class="flex gap-2 mb-2">
+                                <span class="text-[10px] uppercase tracking-wider text-[var(--dix-light-green)] font-bold">${escapeHtml(item.category)}</span>
+                                <span class="text-[10px] uppercase text-gray-400 font-bold">• ${escapeHtml(item.typePorteur)}</span>
+                            </div>
+                            <p class="text-sm leading-relaxed text-gray-600 font-medium">${escapeHtml(item.title)}</p>
+                            
+                            <div class="accordion-content">
+                                <div class="h-px bg-gray-100 w-full mb-4"></div>
+                                <p class="text-sm italic text-gray-500 leading-relaxed whitespace-pre-line mb-5">${escapeHtml(item.desc) || 'Pas de description disponible.'}</p>
+                                <div class="flex items-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest font-oswald border-t pt-4">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-[var(--dix-light-green)]"></i>
+                                    <span>${displayAddress} (${escapeHtml(item.region)})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                card.onclick = () => selectRef(item, true);
+                listContainer.appendChild(card);
+                
+                // Création du marqueur sur la carte
+                const markerIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="marker-dot" style="background-color: var(--dix-light-green); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.2);"></div>`,
+                    iconSize: [16, 16], iconAnchor: [8, 8]
+                });
+                
+                const marker = L.marker([item.lat, item.lng], { icon: markerIcon }).addTo(markersLayer);
+                marker.itemData = item;
+                marker.on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    selectRef(item, true);
+                });
+                
+                bounds.push([item.lat, item.lng]);
+            });
+
+            if (bounds.length > 0) {
+                const uniqueBounds = [...new Set(bounds.map(b => b[0]+","+b[1]))];
+                if (uniqueBounds.length === 1) {
+                   map.setView(bounds[0], 6); // S'il n'y a qu'un point, on centre sans trop zoomer
+                } else {
+                   map.fitBounds(bounds, { padding: [60, 60], maxZoom: 11 });
+                }
+            }
+            refreshIcons();
+        }
+
+        function resetView() {
+            const bounds = [];
+            markersLayer.eachLayer(layer => {
+                if (layer instanceof L.Marker) bounds.push(layer.getLatLng());
+            });
+            if (bounds.length > 0) {
+                const uniqueBounds = [...new Set(bounds.map(b => b.lat+","+b.lng))];
+                if (uniqueBounds.length === 1) map.flyTo(bounds[0], 6, { duration: 1.2 });
+                else map.fitBounds(bounds, { padding: [60, 60], duration: 1.2 });
+            }
+        }
+
+        function selectRef(item, fromUI = false) {
+            document.querySelectorAll('#resultsList > div').forEach(el => el.classList.remove('active-card'));
+            
+            const card = document.getElementById(`card-${item.id}`);
+            if(card) {
+                card.classList.add('active-card');
+                if (fromUI) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            map.flyTo([item.lat, item.lng], 12, { duration: 1.2 });
+            
+            if (activeMarker) activeMarker.unbindTooltip();
+            
+            markersLayer.eachLayer(layer => {
+                if (layer.itemData && layer.itemData.id === item.id) {
+                    const clientShort = escapeHtml(item.client.substring(0,18));
+                    let tooltipLogoHtml;
+                    if (item.logo && item.logo.trim() !== "") {
+                        tooltipLogoHtml = `<img src="${escapeHtml(item.logo)}" onerror="this.onerror=null; this.outerHTML='<span class=\\'font-oswald text-[10px] px-2 text-[var(--dix-dark-green)] font-bold text-center\\'>${clientShort.replace(/'/g, "\\'")}</span>'" style="max-height: 40px; max-width: 100px; width: auto; height: auto; object-fit: contain; display: block;">`;
+                    } else {
+                        tooltipLogoHtml = `<span class="font-oswald text-[10px] px-2 text-[var(--dix-dark-green)] font-bold text-center">${clientShort}</span>`;
+                    }
+
+                    const tooltipHtml = `<div class="map-logo-badge">${tooltipLogoHtml}</div>`;
+                    layer.bindTooltip(tooltipHtml, { permanent: true, direction: 'top', offset: [0, -15], opacity: 1 }).openTooltip();
+                    activeMarker = layer;
+                }
+            });
+        }
+
+        document.getElementById('searchInput').oninput = filterData;
+        document.getElementById('themeFilter').onchange = filterData;
+        document.getElementById('typeFilter').onchange = filterData;
+        document.getElementById('yearFilter').onchange = filterData;
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const theme = document.getElementById('themeFilter').value;
+            const typePorteur = document.getElementById('typeFilter').value;
+            const year = document.getElementById('yearFilter').value;
+
+            const filtered = allData.filter(d => {
+                const matchesSearch = (d.title + d.client + d.desc + d.adresse + d.city).toLowerCase().includes(search);
+                const matchesTheme = theme === "" || d.category === theme;
+                const matchesType = typePorteur === "" || d.typePorteur === typePorteur;
+                const matchesYear = year === "" || d.year === year;
+                return matchesSearch && matchesTheme && matchesType && matchesYear;
+            });
+            render(filtered);
+            if (activeMarker) activeMarker = null;
+        }
+    </script>
+</body>
+</html>
