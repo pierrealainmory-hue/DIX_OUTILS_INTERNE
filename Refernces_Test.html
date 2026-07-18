@@ -222,7 +222,7 @@
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([46.80, 2.50], 6);
             
-            // NOUVEAU : Serveur OpenStreetMap France avec classe CSS pour le rendre gris
+            // NOUVEAU : Serveur OpenStreetMap France avec le filtre gris appliqué
             L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap France',
                 className: 'french-map-tiles'
@@ -312,10 +312,9 @@
 
             let years = [...new Set(allData.map(d => d.year))].filter(Boolean);
             years.sort((a, b) => {
-                // Forcer "En cours" tout en haut
-                if (a.toLowerCase() === "en cours") return -1;
-                if (b.toLowerCase() === "en cours") return 1;
-                return b.localeCompare(a); // Ordre décroissant
+                if (a === "En cours") return -1;
+                if (b === "En cours") return 1;
+                return b.localeCompare(a);
             });
             
             const yearSelect = document.getElementById('yearFilter');
@@ -332,7 +331,23 @@
             markersLayer.clearLayers();
             const bounds = [];
             
+            // NOUVEAU : Suivi des coordonnées pour éviter les superpositions (Jitter dynamique)
+            const coordTracker = {};
+            
             data.forEach(item => {
+                // Décalage visuel (spirale) si la coordonnée exacte existe déjà
+                const coordKey = item.lat + "," + item.lng;
+                if (coordTracker[coordKey]) {
+                    const count = coordTracker[coordKey];
+                    coordTracker[coordKey]++;
+                    const radius = 0.003 * count; // écart proportionnel d'environ 300m
+                    const angle = count * 2.4; // placement en cercle/spirale
+                    item.lat += Math.cos(angle) * radius;
+                    item.lng += Math.sin(angle) * radius;
+                } else {
+                    coordTracker[coordKey] = 1;
+                }
+
                 const card = document.createElement('div');
                 card.id = `card-${item.id}`;
                 card.className = "bg-white rounded-2xl cursor-pointer transition-all duration-300 border border-gray-100 p-6 group";
