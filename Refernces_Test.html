@@ -21,13 +21,7 @@
             --dix-light-green: #549e39;
             --dix-white-grey: #f3f3f3;
         }
-        body { 
-            font-family: 'Georgia', serif; 
-            color: var(--dix-dark-green); 
-            overflow: hidden; 
-            background-color: white; 
-            height: 100vh; 
-        }
+        body { font-family: 'Georgia', serif; color: var(--dix-dark-green); overflow: hidden; background-color: white; height: 100vh; }
         h1, h2, h3, h4, .font-oswald { 
              font-family: 'Oswald', sans-serif; 
              text-transform: uppercase;
@@ -174,10 +168,9 @@
     </footer>
 
     <script>
-        // Utilisation de l'URL GViz API pour contourner les erreurs de fichier inaccessible (CORS)
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/1BkUT6wt-XwqU_75leF2U2l02YxR100ppLmVmew6jM_k/gviz/tq?tqx=out:csv&gid=917397259";
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_4bPCRFK_gGVkxP-ZeTHzLauhQtqNg_zG2chKNuY8-iyDAuHjc_CQbpBCU4LY9-GRi1579CsUkhr/pub?gid=917397259&single=true&output=csv";
         
-        // Ordre des colonnes selon la formule ARRAYFORMULA(C1:H \ K1:L \ N1:P \ T1:U)
+        // Configuration stricte des 13 colonnes alignée sur votre nouvelle formule
         let COLS = { 
             ANNEE: 0, REGION: 1, LOGO: 2, CLIENT: 3, TYPE: 4, CATEGORIE: 5, 
             TITRE: 6, DESC: 7, 
@@ -222,7 +215,6 @@
         };
 
         function initMap() {
-            // Fond de carte moderne CartoDB (affiche les noms en langue locale, donc en Français pour la France)
             map = L.map('map', { zoomControl: false }).setView([46.80, 2.50], 6);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap'
@@ -256,7 +248,7 @@
                         const lng = parseFloat(String(row[COLS.LNG] || "").replace(',', '.').replace(/\s/g, ''));
                         if (isNaN(lat) || isNaN(lng)) return null;
                         
-                        // Récupération de l'année (et nettoyage des sauts de lignes éventuels)
+                        // Récupération de l'année
                         let yearRaw = row[COLS.ANNEE] || "";
                         let yearDisplay = yearRaw.split('\n')[0].trim();
                         
@@ -314,7 +306,7 @@
                 // Forcer "En cours" tout en haut
                 if (a.toLowerCase() === "en cours") return -1;
                 if (b.toLowerCase() === "en cours") return 1;
-                return b.localeCompare(a); // Ordre décroissant pour les dates
+                return b.localeCompare(a); // Ordre décroissant
             });
             
             const yearSelect = document.getElementById('yearFilter');
@@ -385,7 +377,7 @@
                 card.onclick = () => selectRef(item, true);
                 listContainer.appendChild(card);
                 
-                // Création du marqueur sur la carte
+                // Création du marqueur
                 const markerIcon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<div class="marker-dot" style="background-color: var(--dix-light-green); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.2);"></div>`,
@@ -405,7 +397,7 @@
             if (bounds.length > 0) {
                 const uniqueBounds = [...new Set(bounds.map(b => b[0]+","+b[1]))];
                 if (uniqueBounds.length === 1) {
-                   map.setView(bounds[0], 6); // S'il n'y a qu'un point, on centre sans trop zoomer
+                   map.setView(bounds[0], 6);
                 } else {
                    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 11 });
                 }
